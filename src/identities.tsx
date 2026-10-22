@@ -9,7 +9,7 @@ import {Button, Checkbox, Input} from 'cromma-ui';
 import {ShieldCheck, Refresh} from 'cromma-ui/pika';
 import {motion, useMotionValue, useSpring} from 'motion/react';
 import {invoke} from '@tauri-apps/api/core';
-import {useI18n} from './i18n';
+import {dateLocale,useI18n} from './i18n';
 import {AppDialog} from './dialog';
 import {IdentityOperationProgress, useCleanupActivity} from './cleaner-activity';
 import {formatBytes} from './cleaner-model';
@@ -188,7 +188,7 @@ export function IdentityPanel({onBusy, initialEmpty=false}: {onBusy?: (busy:bool
       {authLabel(credentialStatus(summary,now))&&<span title={t('仅依据本地元数据，不代表服务端认证结果。')} className={`identity-status-badge auth-${credentialStatus(summary,now)}`}>{t(authLabel(credentialStatus(summary,now))!)}</span>}
       {state?.browser.bound_ids.includes(row.id)&&<span className="identity-browser-badge">{t('独立浏览器')}</span>}
      </div>
-     <time>{new Date(row.saved_at).toLocaleString(locale==='zh'?'zh-CN':'en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</time>
+     <time>{new Date(row.saved_at).toLocaleString(dateLocale(locale),{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</time>
      <div className="identity-card-footer"><Button variant="secondary" size="small" disabled={blocked} onClick={()=>choose(row)}>{t('切换')}</Button><Button variant="ghost" size="small" disabled={blocked} onClick={()=>{setRename(row);setRenameValue(row.name);setError('');}}>{t('重命名')}</Button><Button variant="ghost" size="small" disabled={blocked} onClick={()=>confirmDelete(row)}>{t('删除')}</Button></div>
     </IdentityCard>;})}
    </div>

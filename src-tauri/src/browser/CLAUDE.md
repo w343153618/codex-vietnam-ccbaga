@@ -12,3 +12,5 @@ workspaces.rs: 以 SQLite 绑定统一解析资料与配置；正常退出后才
 launch.rs: 已持有浏览器互斥锁时复用的同步启动核心；身份联动与手动启动走同一参数、资料和进程验证。
 workspace_tests.rs: 临时数据库清理前明确释放句柄以兼容 Windows；Cookie/缓存/种子隔离、手动换指纹持久化、旧资料保留及恢复阻断；迁移配置保留手动种子、全新目录只含配置/owner、拒绝覆盖且当前 Cookie/选择不变。
 [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+
+Vietnam derivative: config.rs accepts vi and vi-VN; network.rs uses the narrow Vietnam timezone alias equivalence. Tests retain rejection of mismatching countries, language and missing observations.

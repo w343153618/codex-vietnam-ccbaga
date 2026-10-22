@@ -1,5 +1,5 @@
 /**
- * [INPUT]: 中英文 YAML、共享翻译入口与 TypeScript 源码目录。
+ * [INPUT]: 中文、英文和越南语 YAML、共享翻译入口与 TypeScript 源码目录。
  * [OUTPUT]: 双语键/插槽一致性、全部界面源文案覆盖、原生结果/浏览器全清理部分失败计数翻译及切换后保留原始数据的回归。
  * [POS]: 本地化的离线验证；不启动图形界面，不修改系统语言或用户设置。
  * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
@@ -8,9 +8,10 @@ import {test,expect} from 'bun:test';
 import {readFileSync,readdirSync} from 'node:fs';
 import {parse} from 'yaml';
 import ts from 'typescript';
-import {translate,setLocale} from './i18n';
+import {translate,setLocale,dateLocale} from './i18n';
 const zh:Record<string,string>=parse(readFileSync(new URL('./locales/zh.yaml',import.meta.url),'utf8'));
 const en:Record<string,string>=parse(readFileSync(new URL('./locales/en.yaml',import.meta.url),'utf8'));
+const vi:Record<string,string>=parse(readFileSync(new URL('./locales/vi.yaml',import.meta.url),'utf8'));
 const slots=(value:string)=>[...value.matchAll(/\{(\w+)\}/g)].map(match=>match[1]).sort();
 test('双语目录完整且命名插槽一致',()=>{
   expect(Object.keys(en).sort()).toEqual(Object.keys(zh).sort());
@@ -53,4 +54,26 @@ test('原生错误、参数和原始路径可切换语言，未知消息原样�
   setLocale('fr');expect(translate('网络环境')).toBe('网络环境');
   setLocale('en');expect(translate('时区已核验。{v0}',{v0:'首选语言与地区格式已保存，部分应用需重启或注销。'})).toBe('Time zone verified. Preferred language and region saved. Some apps require restarting or signing out.');
   setLocale('zh');
+});
+
+test('Vietnamese catalog preserves every key and interpolation contract',()=>{
+ expect(Object.keys(vi).sort()).toEqual(Object.keys(zh).sort());
+ for(const key of Object.keys(zh)){
+  expect(vi[key].trim().length).toBeGreaterThan(0);
+  expect(slots(vi[key])).toEqual(slots(zh[key]));
+  expect(/[\u3400-\u9fff]/.test(vi[key])).toBe(false);
+ }
+});
+test('Vietnamese translates dynamic diagnostics while preserving unknown raw data',()=>{
+ setLocale('vi');
+ expect(translate('越南 · 胡志明市')).toBe('Việt Nam · Thành phố Hồ Chí Minh');
+ expect(translate('已删除：Default/Bookmarks')).toBe(vi['已删除']+': Default/Bookmarks');
+ expect(translate('已发现 12 个可选项目。')).toBe(vi['已发现 {v0} 个可选项目。'].replace('{v0}','12'));
+ expect(translate('Error: 清理快照已过期，请重新扫描。')).toBe('Error: '+vi['清理快照已过期，请重新扫描。']);
+ expect(translate('/home/desktop/profile')).toBe('/home/desktop/profile');
+ setLocale('vi-VN');expect(translate('取消')).toBe(vi['取消']);
+ expect(dateLocale('vi')).toBe('vi-VN');
+ expect(dateLocale('en')).toBe('en-US');
+ expect(dateLocale('zh')).toBe('zh-CN');
+ setLocale('zh');
 });

@@ -8,7 +8,7 @@ import {useEffect,useState} from 'react';
 import {Button,Checkbox,Input} from 'cromma-ui';
 import {invoke} from '@tauri-apps/api/core';
 import {AppDialog} from './dialog';
-import {useI18n} from './i18n';
+import {dateLocale,useI18n} from './i18n';
 import {policyRows,type Identity,type IdentityState} from './identity-model';
 import type {ActivityController} from './cleaner-activity';
 type Grant={token:string;file_name:string};
@@ -41,7 +41,7 @@ export function IdentityTransfer({target,hasBrowser,onClose,onBusy,onState,activ
  return <AppDialog open={target!==null} onOpenChange={open=>{if(!open&&!busy)onClose();}} title={t(exporting?'导出身份':'导入身份')} description={t(exporting?'导出保存的登录与身份数据，请妥善保管文件和密码。':'仅支持相同操作系统；将新增保存身份，不切换当前身份。')} footer={<><Button variant="secondary" disabled={busy} onClick={onClose}>{t('取消')}</Button><Button variant="ink" disabled={busy||!grant||!valid||!accepted} loading={busy} onClick={()=>void submit()}>{t(exporting?'加密导出':'解密导入')}</Button></>}>
   <div className="identity-confirm identity-transfer">
    {exporting&&<div className="identity-confirm-target"><span>{t('身份')}</span><strong>{target.name}</strong></div>}
-   {exporting&&<div className="identity-confirm-target"><span>{t('备份时间')}</span><time>{new Date(target.saved_at).toLocaleString(locale==='zh'?'zh-CN':'en-US')}</time></div>}
+   {exporting&&<div className="identity-confirm-target"><span>{t('备份时间')}</span><time>{new Date(target.saved_at).toLocaleString(dateLocale(locale))}</time></div>}
    <div className="identity-transfer-file"><span>{grant?.file_name||t('尚未选择文件')}</span><Button variant="secondary" size="small" disabled={busy} onClick={()=>void pick()}>{t(exporting?'选择保存位置':'选择文件')}</Button></div>
    {exporting&&<div className="identity-confirm-keep"><span>{t('纳入加密备份')}</span><strong>{[t('登录与身份数据'),...policyRows.filter(([key])=>!target.policy[key]).map(([,label])=>t(label))].join(' · ')}</strong></div>}
    <label htmlFor="identity-transfer-password">{t('迁移密码（至少 12 个字符）')}</label><Input id="identity-transfer-password" type="password" autoComplete="off" aria-invalid={tooLong} value={password} disabled={busy} maxLength={1024} onChange={event=>setPassword(event.target.value)}/>

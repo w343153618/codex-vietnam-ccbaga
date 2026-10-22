@@ -5,7 +5,7 @@ identities/ - SQLite 身份目录与脱敏摘要、用户保留策略、原地�
 cleaner_identity.rs: 身份目标/保留策略与窄 JSON 操作、真实 Claude 进程结果和瞬态锁分类；锁仅从快照/旧归档恢复中排除，不借结束进程或备份自动删除文件；非空同名目录仍作为用户数据，复用完整快照和所有权边界，不扫描源码，共享代理遵循个人设置保留选择。
 updater_tests.rs: 官方更新器本机 HTTP 公开向量验证篡改与版本冒用；发布显式传入实际清单/归档，下载核验而不安装。
 main.rs: 官方更新/重启/原生文件选择插件与 Tauri 生命周期、双语托盘和文件残留扫描/选择清理、身份/密码迁移一次性文件票据/CLI/浏览器/固定网络入口命令注册；启动时带起 CCBaga-B，退出删除 start.url；发布缺少 custom-protocol 时编译失败，防止安装包依赖开发服务；Windows 正式宿主使用 GUI 子系统，CI 仅记录固定启动阶段定位实际运行阻塞，不记录参数或用户资料。
-ui_language.rs: 受 zh/en 白名单限制的界面偏好，原子持久化后发布内存状态；共用托盘菜单，独立于电脑与浏览器语言。
+ui_language.rs: 受 zh/en/vi 白名单限制的界面偏好，原子持久化后发布内存状态；共用托盘菜单，独立于电脑与浏览器语言。
 browser/: 指纹浏览器、资料与缓存边界、真实浏览器回报及目标地区环境核验；见其 CLAUDE.md。
 windows.rs: Win32 剪贴板、TokenUser/TokenOwner 文件检查、绝对长路径、真实 UI 语言/区域/时区和本机代理；不以额外管理员组扩大信任，不将新偏好冒充当前显示语言；拒绝凭据管理器自动读取和 SSH 操作。
 windows_tests.rs: 隔离文件所有者、长路径/命名空间及代理/语言格式回归；CI 专用时区写入后还原，不操作本机真实身份。
@@ -28,3 +28,5 @@ regions.rs: 地区编号到语言、区域格式和代表时区的唯一白名�
 linux.rs: Linux procfs 当前用户进程、zoneinfo/timedatectl、GNOME 定位偏好、GNOME/KDE 设置入口与 Wayland/X11 剪贴板；LC_MESSAGES/LC_TIME 分别读取会话语言/区域格式，不匹配时先报手动操作再改时区；未知定位为 null，Linux 钥匙串明确不可用；不将系统代理凭据序列化给 WebView。
 network_links.rs: 固定四域名并发只读 HTTP 探针；下载元数据仅接受 HTTP200、流式最多64字节的三段数字版本，空/畸形/超限/截断均失败且正文不进UI；其他域名维持连通性/浏览器质询语义；重定向只认可无认证的官方HTTPS:443目标，始终不跟随。默认不继承代理认证、不跟随重定向、八秒超时；固定供应商与 Skill 导航白名单，编译消费 providers.json 组装原始 URL，WebView 不能指定 URL；无密钥访问或 SSH 执行。
 [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+
+Vietnam derivative: regions.rs adds VN/vi-VN/vi_VN; same_timezone recognizes the IANA Vietnam alias only. ui_language.rs persists zh/en/vi and translates tray labels; platform language options include Vietnamese.

@@ -1,4 +1,4 @@
-// [INPUT]: 应用数据目录和显式的 zh/en 界面偏好。
+// [INPUT]: 应用数据目录和显式的 zh/en/vi 界面偏好。
 // [OUTPUT]: 语言读写命令及回环服务共享的当前语言；原子保存后再发布内存状态。
 // [POS]: 界面语言边界，独立于系统语言、浏览器指纹和地区设置。
 // [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
@@ -6,7 +6,7 @@ use std::{fs, sync::Mutex};
 use tauri::Manager;
 pub struct UiLanguage(pub Mutex<String>);
 pub fn valid(language: &str) -> bool {
-    matches!(language, "zh" | "en")
+    matches!(language, "zh" | "en" | "vi")
 }
 impl UiLanguage {
     pub fn load(app: &tauri::AppHandle) -> Self {
@@ -58,10 +58,10 @@ pub fn menu(
     let open = MenuItem::with_id(
         app,
         "open",
-        if language == "en" {
-            "Open CCBaga-A"
-        } else {
-            "打开 CCBaga-A"
+        match language {
+            "vi" => "Mở CCBaga-A",
+            "en" => "Open CCBaga-A",
+            _ => "打开 CCBaga-A",
         },
         true,
         None::<&str>,
@@ -69,7 +69,7 @@ pub fn menu(
     let quit = MenuItem::with_id(
         app,
         "quit",
-        if language == "en" { "Quit" } else { "退出" },
+        match language { "vi" => "Thoát", "en" => "Quit", _ => "退出" },
         true,
         None::<&str>,
     )?;
@@ -81,7 +81,8 @@ mod tests {
     fn locale_is_independent_and_restricted() {
         assert!(super::valid("zh"));
         assert!(super::valid("en"));
-        for value in ["", "en-US", "zh-Hant", "../en", "fr"] {
+        assert!(super::valid("vi"));
+        for value in ["", "en-US", "zh-Hant", "../en", "fr", "vi-VN", "../vi"] {
             assert!(!super::valid(value));
         }
     }

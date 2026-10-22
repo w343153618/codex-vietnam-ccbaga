@@ -23,3 +23,14 @@ test('五项工具只复制正确语言的安装与运行提示词',()=>{
         expect(en).not.toContain('VPS');expect(en).not.toContain('TUN');
     }
 });
+
+test('Vietnamese installation copy preserves exact commands and requests Vietnamese',()=>{
+ for(const agent of agents){
+  const vi=installationPrompt(agent.id,'vi');
+  expect(vi).toContain('DO_NOT_TRACK=1');
+  expect(vi).toContain('npx --yes skills add liseami/CCBaga --skill ccbaga-network --global --copy --yes');
+  if(agent.cli)expect(vi).toContain(`--agent ${agent.cli}`);
+  expect(vi).toContain(agent.invoke);
+  expect(vi).toContain('tiếng Việt');
+ }
+});
