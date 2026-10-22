@@ -6,7 +6,7 @@ Upstream: https://github.com/liseami/CCBaga
 
 Base commit: `bdfb90ceadfc5fae6772ffff597bddecb0b73cc3`
 
-Modified branch: https://github.com/w343153618/CCBaga/tree/codex/vietnam-localization
+Modified branch: https://github.com/w343153618/codex-vietnam-ccbaga/tree/codex/vietnam-localization
 
 ## Changes
 
