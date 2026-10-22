@@ -298,7 +298,7 @@ fn language(locale: &str) -> String {
     match locale {
         "zh_CN" | "zh_SG" => "zh-Hans".into(),
         "zh_TW" | "zh_HK" => "zh-Hant".into(),
-        s if s.starts_with("en_") || s == "pt_BR" => s.replace('_', "-"),
+        s if s.starts_with("en_") || s == "pt_BR" || s == "vi_VN" => s.replace('_', "-"),
         s => s.split('_').next().unwrap_or(s).into(),
     }
 }
@@ -435,6 +435,10 @@ mod tests {
         assert_eq!(language("zh_CN"), "zh-Hans");
         assert_eq!(language("en_US"), "en-US");
         assert_eq!(language("de_DE"), "de");
+        assert_eq!(language("vi_VN"), "vi-VN");
+        assert!(language_matches("vi-VN", "vi"));
+        assert!(language_matches("vi-VN", "vi-VN"));
+        assert!(!language_matches("vi-VN", "en-US"));
         assert!(language_matches("en-US", "en"));
         assert!(language_matches("en-US", "en-US"));
         for invalid in ["", "e", "en-U", "en-GB", "en-US;bad"] {

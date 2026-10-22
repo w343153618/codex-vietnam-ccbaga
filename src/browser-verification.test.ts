@@ -53,3 +53,15 @@ test('手动预设继续检查所选脚本；跟随机器保留原有 en 到 en-
  const manual={...context,config:{...context.config,language:'zh-Hant'},machine:{...context.machine,languages:['zh-Hans-TW']}};
  expect(verifyBrowser(manual,{...report,language:'zh-Hans-TW'},true,'',false).checks.find(row=>row.label==='网页语言')?.ok).toBe(false);
 });
+
+test('Vietnam accepts the IANA legacy zone name but still rejects a foreign exit or unknown location',()=>{
+ const ctx:BrowserContext={...context,region:{id:'vn',label:'Vietnam',country:'VN',language:'vi-VN',locale:'vi_VN',timezone:'Asia/Ho_Chi_Minh'},config:{...context.config,language:'vi-VN',timezone:'Asia/Ho_Chi_Minh'},machine:{...context.machine,platform:'linux',timezone:'Asia/Ho_Chi_Minh',languages:['vi-VN'],locale:'vi_VN.UTF-8',locale_country:'VN'}};
+ const observed:Report={...report,platform:'Linux x86_64',language:'vi-VN',languages:['vi-VN','vi'],timezone:'Asia/Saigon',exit:{...report.exit!,country:'VN',timezone:'Asia/Ho_Chi_Minh'}};
+ expect(verifyBrowser(ctx,observed,true,'',false).phase).toBe('passed');
+ for(const zone of ['Asia/Bangkok','Asia/Jakarta','Etc/GMT-7','']) {
+  expect(verifyBrowser(ctx,{...observed,timezone:zone},true,'',false).phase).toBe('failed');
+ }
+ expect(verifyBrowser(ctx,{...observed,exit:{...observed.exit!,country:'TH'}},true,'',false).phase).toBe('failed');
+ expect(verifyBrowser({...ctx,machine:{...ctx.machine,location_enabled:null}},observed,true,'',false).phase).toBe('failed');
+ expect(verifyBrowser({...ctx,machine:{...ctx.machine,locale_country:'TH'}},observed,true,'',false).phase).toBe('failed');
+});

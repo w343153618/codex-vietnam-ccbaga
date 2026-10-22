@@ -12,6 +12,14 @@ pub struct Region {
     pub locale: &'static str,
     pub timezone: &'static str,
 }
+// Asia/Saigon is the IANA backward-compatible name for this same Vietnam zone.
+// Do not equate distinct UTC+7 locations such as Asia/Bangkok.
+pub fn same_timezone(a: &str, b: &str) -> bool {
+    fn canonical(zone: &str) -> &str {
+        match zone { "Asia/Saigon" => "Asia/Ho_Chi_Minh", _ => zone }
+    }
+    !a.is_empty() && !b.is_empty() && canonical(a) == canonical(b)
+}
 const REGIONS: &[Region] = &[
     Region {
         id: "us-west",
@@ -84,6 +92,14 @@ const REGIONS: &[Region] = &[
         language: "en-SG",
         locale: "en_SG",
         timezone: "Asia/Singapore",
+    },
+    Region {
+        id: "vn",
+        country: "VN",
+        label: "越南 · 胡志明市",
+        language: "vi-VN",
+        locale: "vi_VN",
+        timezone: "Asia/Ho_Chi_Minh",
     },
     Region {
         id: "tw",
@@ -174,6 +190,23 @@ mod tests {
         assert!(matching("zh-Hans", "Asia/Taipei").is_none());
     }
     #[test]
+    fn vietnam_and_only_its_iana_alias_are_recognized() {
+        let vn = find("vn").unwrap();
+        assert_eq!((vn.country, vn.language, vn.locale), ("VN", "vi-VN", "vi_VN"));
+        assert_eq!(locale_country("vi_VN.UTF-8").as_deref(), Some("VN"));
+        for zone in ["Asia/Ho_Chi_Minh", "Asia/Saigon"] {
+            assert_eq!(matching_country("VN", zone).map(|r| r.id), Some("vn"));
+            assert_eq!(matching("vi-VN", zone).map(|r| r.id), Some("vn"));
+            assert_eq!(matching("vi", zone).map(|r| r.id), Some("vn"));
+        }
+        for zone in ["Asia/Bangkok", "Asia/Jakarta", "Etc/GMT-7", ""] {
+            assert!(matching_country("VN", zone).is_none());
+        }
+        assert!(matching_country("TH", "Asia/Saigon").is_none());
+        assert!(matching("en-US", "Asia/Saigon").is_none());
+        assert!(!same_timezone("", ""));
+    }
+    #[test]
     fn catalog_has_unique_ids_and_valid_native_timezones() {
         let machine = crate::browser::config::machine().unwrap();
         for (i, r) in REGIONS.iter().enumerate() {
@@ -184,7 +217,7 @@ mod tests {
     }
     #[test]
     fn catalog_does_not_expand_or_equate_distinct_iana_zones() {
-        assert_eq!(REGIONS.len(), 13);
+        assert_eq!(REGIONS.len(), 14);
         assert!(matching("en-US", "America/Chicago").is_none());
         assert!(matching("en-US", "America/Phoenix").is_none());
         assert!(matching("en-US", "US/Pacific").is_none());
@@ -197,7 +230,7 @@ mod tests {
 pub fn matching(language: &str, timezone: &str) -> Option<&'static Region> {
     REGIONS
         .iter()
-        .find(|r| r.language == language && r.timezone == timezone)
+        .find(|r| (r.language == language || (r.id == "vn" && language == "vi")) && same_timezone(r.timezone, timezone))
 }
 
 /// Extract an explicit ISO country from ICU/POSIX or BCP 47 locale identifiers.
@@ -272,5 +305,5 @@ pub fn locale_country(locale: &str) -> Option<String> {
 pub fn matching_country(country: &str, timezone: &str) -> Option<&'static Region> {
     REGIONS
         .iter()
-        .find(|r| r.country == country && r.timezone == timezone)
+        .find(|r| r.country == country && same_timezone(r.timezone, timezone))
 }

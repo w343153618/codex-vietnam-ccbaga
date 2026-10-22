@@ -191,9 +191,9 @@ pub fn checks(
             report
                 .zip(report.and_then(|r| r.exit.as_ref()))
                 .map(|(r, e)| {
-                    r.timezone == config.timezone(machine)
-                        && r.timezone == machine.timezone
-                        && r.timezone == e.timezone
+                    crate::regions::same_timezone(&r.timezone, &config.timezone(machine))
+                        && crate::regions::same_timezone(&r.timezone, &machine.timezone)
+                        && crate::regions::same_timezone(&r.timezone, &e.timezone)
                 }),
             format!(
                 "本机：{}；浏览器：{}；出口：{}",

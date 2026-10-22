@@ -408,6 +408,7 @@ pub(super) const TZ_MAP: &[(&str, &str)] = &[
     ("Asia/Phnom_Penh", "SE Asia Standard Time"),
     ("Asia/Vientiane", "SE Asia Standard Time"),
     ("Asia/Saigon", "SE Asia Standard Time"),
+    ("Asia/Ho_Chi_Minh", "SE Asia Standard Time"),
     ("Etc/GMT-7", "SE Asia Standard Time"),
     ("Asia/Novokuznetsk", "North Asia Standard Time"),
     ("Asia/Hong_Kong", "China Standard Time"),

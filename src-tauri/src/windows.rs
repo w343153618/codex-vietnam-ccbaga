@@ -729,6 +729,7 @@ fn region_settings(language: &str, region: Option<&str>) -> Result<Value, String
             "ko" => "ko-KR",
             "ru" => "ru-RU",
             "ar" => "ar-SA",
+            "vi" | "vi-VN" => "vi-VN",
             _ => return Err("语言或区域无效。".into()),
         }
         .into()

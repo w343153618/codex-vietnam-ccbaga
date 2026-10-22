@@ -657,3 +657,28 @@ fn refreshed_context_recomputes_target_from_effective_machine_country() {
     context.update_machine(taiwan);
     assert!(context.region.is_none());
 }
+
+#[test]
+fn vietnam_browser_config_preserves_real_language_and_region_checks() {
+    let mut m = machine();
+    m.languages = vec!["vi-VN".into()];
+    m.locale = "vi_VN".into();
+    m.locale_country = "VN".into();
+    m.timezone = "Asia/Ho_Chi_Minh".into();
+    m.timezones = vec![m.timezone.clone()];
+    let mut c = Config::default();
+    c.language = "vi-VN".into();
+    c.timezone = m.timezone.clone();
+    assert!(c.validate(&m).is_ok());
+    assert_eq!(c.region(&m).map(|r| r.id), Some("vn"));
+    c.follow_machine = false;
+    assert_eq!(c.region(&m).map(|r| r.id), Some("vn"));
+    let args = config::arguments(&c, &m, Path::new("/fixture"), "http://127.0.0.1/", "148.0.7778.215");
+    assert!(args.contains(&"--lang=vi-VN".into()));
+    assert!(args.contains(&"--accept-lang=vi-VN,vi".into()));
+    c.language = "vi".into();
+    assert!(c.validate(&m).is_ok());
+    assert_eq!(c.region(&m).map(|r| r.id), Some("vn"));
+    c.language = "invalid-language".into();
+    assert!(c.validate(&m).is_err());
+}

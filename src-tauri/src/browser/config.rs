@@ -98,7 +98,7 @@ impl Config {
         proxy(&self.proxy)?;
         if ![
             "en-US", "en-CA", "en-GB", "en-SG", "en-AU", "en", "zh-Hans", "zh-Hant", "fr", "de",
-            "es", "it", "ja", "ko",
+            "es", "it", "ja", "ko", "vi", "vi-VN",
         ]
         .contains(&self.language.as_str())
             || !machine.timezones.contains(&self.timezone)

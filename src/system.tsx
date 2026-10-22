@@ -23,7 +23,7 @@ type SystemResult = {
     state: SystemState;
     message: string;
 };
-const languages: Record<string, string> = { 'zh-Hans': '简体中文', 'zh-Hant': '繁體中文', en: 'English', fr: 'Français', de: 'Deutsch', es: 'Español', it: 'Italiano', 'pt-BR': 'Português (Brasil)', ja: '日本語', ko: '한국어', ru: 'Русский', ar: 'العربية' };
+const languages: Record<string, string> = { 'zh-Hans': '简体中文', 'zh-Hant': '繁體中文', en: 'English', fr: 'Français', de: 'Deutsch', es: 'Español', it: 'Italiano', 'pt-BR': 'Português (Brasil)', ja: '日本語', ko: '한국어', ru: 'Русский', ar: 'العربية', 'vi-VN': 'Tiếng Việt' };
 function languageChoice(code: string) { return Object.keys(languages).find(key => code === key || code.startsWith(key + '-')); }
 export function SystemPanel({ onBusy }: {
     onBusy?: (busy: boolean) => void;

@@ -4,7 +4,7 @@
  * [POS]: 起始页的纯核验模型，与 DOM/网络分离，沿用宿主的时区、语言及设备规则。
  * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
  */
-import {matchesDevice, type BrowserContext, type Report} from './browser-model';
+import {sameTimezone,matchesDevice, type BrowserContext, type Report} from './browser-model';
 export type VerificationPhase='checking'|'failed'|'passed';
 export type VerificationCheck={label:string;actual:string;expected:string;ok:boolean|null};
 export function verifyBrowser(context:BrowserContext|null,report:Report|null,linked:boolean,error:string,busy:boolean) {
@@ -22,9 +22,9 @@ export function verifyBrowser(context:BrowserContext|null,report:Report|null,lin
   const add=(label:string,actual:string|number|undefined|null,expected:string|number|undefined|null,ok:boolean|null)=>checks.push({label,actual:actual==null||actual===''?'尚未核验':String(actual),expected:expected==null||expected===''?'尚未核验':String(expected),ok});
   if(!exit)problems.push('无法验证网络出口，请检查连接后重测。');
   add('出口国家',exit?.country,region?.country,region&&exit?exit.country===region.country:null);
-  add('网页时区',report.timezone,config.follow_machine?machine.timezone:config.timezone,!!report.timezone&&report.timezone===(config.follow_machine?machine.timezone:config.timezone));
-  add('出口时区',exit?.timezone,report.timezone,!!exit?.timezone&&exit.timezone===report.timezone);
-  add('本机时区',machine.timezone,report.timezone,!!machine.timezone&&machine.timezone===report.timezone);
+  add('网页时区',report.timezone,config.follow_machine?machine.timezone:config.timezone,sameTimezone(report.timezone,config.follow_machine?machine.timezone:config.timezone));
+  add('出口时区',exit?.timezone,report.timezone,sameTimezone(exit?.timezone,report.timezone));
+  add('本机时区',machine.timezone,report.timezone,sameTimezone(machine.timezone,report.timezone));
   add('网页语言',report.language,language,language&&report.language?report.language===language:null);
   add('本机首选语言',first,language,first&&language?first===language||first.startsWith(language+'-')||(config.follow_machine&&first==='en'&&language==='en-US'):null);
   add('本机区域',machine.locale,region?.country,region&&machine.locale_country?machine.locale_country===region.country:null);

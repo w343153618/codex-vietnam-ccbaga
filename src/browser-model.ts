@@ -4,6 +4,11 @@
  * [POS]: 浏览器页面与宿主的边界，不持有凭据或执行清理。
  * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
  */
+// IANA's historical Vietnam alias is equivalent; shared UTC offsets are not.
+export function sameTimezone(a:string|undefined,b:string|undefined):boolean {
+ const canonical=(zone:string)=>zone==='Asia/Saigon'?'Asia/Ho_Chi_Minh':zone;
+ return !!a&&!!b&&canonical(a)===canonical(b);
+}
 export type BrowserConfig={seed:number;proxy:string;follow_machine:boolean;language:string;timezone:string;native_graphics:boolean};
 export type Machine={platform:string;version:string;cores:number;timezone:string;languages:string[];locale:string;locale_country:string;location_enabled:boolean|null;timezones:string[]};
 export type Exit={ip:string;country:string;city:string;timezone:string;isp:string};

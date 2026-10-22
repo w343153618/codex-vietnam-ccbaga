@@ -47,7 +47,7 @@ char *rf_system_open(const char *value) {
 }
 char *rf_system_language(const char *value) {
     NSString *language = [NSString stringWithUTF8String:value];
-    NSArray *allowed = @[@"zh-Hans", @"zh-Hant", @"en", @"fr", @"de", @"es", @"it", @"pt-BR", @"ja", @"ko", @"ru", @"ar"];
+    NSArray *allowed = @[@"zh-Hans", @"zh-Hant", @"en", @"fr", @"de", @"es", @"it", @"pt-BR", @"ja", @"ko", @"ru", @"ar", @"vi", @"vi-VN"];
     if (![allowed containsObject:language]) return systemResponse(@{@"error": @"请选择支持的系统语言。"});
     NSMutableArray *languages = [savedLanguages() mutableCopy];
     [languages removeObject:language];
@@ -141,7 +141,7 @@ char *rf_system_location(void) {
 char *rf_system_region(const char *languageValue, const char *localeValue) {
     NSString *language = [NSString stringWithUTF8String:languageValue];
     NSString *locale = [NSString stringWithUTF8String:localeValue];
-    NSArray *allowed = @[@"en-US", @"en-CA", @"en-GB", @"en-SG", @"en-AU", @"fr", @"de", @"ja", @"ko", @"zh-Hans", @"zh-Hant"];
+    NSArray *allowed = @[@"en-US", @"en-CA", @"en-GB", @"en-SG", @"en-AU", @"fr", @"de", @"ja", @"ko", @"zh-Hans", @"zh-Hant", @"vi-VN"];
     if (![allowed containsObject:language] || ![NSLocale.availableLocaleIdentifiers containsObject:locale])
         return systemResponse(@{@"error": @"语言或地区格式无效。"});
     NSMutableArray *languages = [savedLanguages() mutableCopy];
