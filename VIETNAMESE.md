@@ -39,6 +39,12 @@ Validation on 2026-10-23:
 - Frontend: 27 tests passed, 8,217 assertions; TypeScript and Vite production build passed.
 - Rust: 126 tests passed, 0 failed, 2 upstream tests ignored.
 - The localization fixture exercised Vietnamese, English and Chinese switching and reload persistence. Its native IPC is mocked; it is not evidence of an operating-system setting change.
+- The Debian amd64 package was built and installed on a separate test VM. The running application loaded `vi`, recognized the Vietnam preset, and its browser reported Vietnamese language and time zone. Browser renderers ran as the ordinary desktop user with Seccomp enabled. External IP lookup can independently fail or be rate-limited; this remains a failed/unknown check.
+- Existing per-profile browser settings can override the legacy/default config. Set the language and time zone in the active browser profile as well when updating an existing installation.
 - macOS and Windows runtime behavior has not been tested for this derivative.
 
 The original MIT license and upstream notices remain in force. Linux does not automatically update this local derivative; installing an upstream package later can replace these changes.
+
+To review all twelve built-in browser checks from a sanitized runtime capture, use `bun tests/verify-runtime-input.ts INPUT.json OUTPUT.json`. The input contains `context` and `report` from the running local application. The script uses the unchanged production `verifyBrowser` function; it preserves false and unknown results. Runtime captures must exclude identity and proxy credentials and are not committed to this fork.
+
+In the tested deployment with the existing native-readings browser launcher retained, the twelve environment checks were not all green: 8 passed, 2 failed, and 2 remained unknown. External IP providers returned HTTP 429, the browser high-entropy API reported `148.0.7778.217` while the engine binary/metadata reported `148.0.7778.215`, and the Linux system-location state was unknown. These results were not overridden or reclassified as successful.

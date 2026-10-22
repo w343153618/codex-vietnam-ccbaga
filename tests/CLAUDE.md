@@ -7,3 +7,5 @@ identities-fixture.tsx: 真实 IdentityPanel 或 query panel=browser 的 Browser
 执行入口 ../scripts/test-identities-ui.ts 使用 Node.js 原生管道及临时 HOME/XDG/浏览器上下文、阻止外网、保留真实 DOM 输入；不采集截图或用户目录。
 [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 localization.html / localization-fixture.tsx: presentation-only language-switch and Help/System panels; mock Vietnamese machine and test-only localStorage preference, no native mutation or external requests. Not included in production build.
+
+- `verify-runtime-input.ts`：读取脱敏运行上下文和观测结果，复用生产 `verifyBrowser` 逐条输出十二项环境检查；不提交运行资料。
