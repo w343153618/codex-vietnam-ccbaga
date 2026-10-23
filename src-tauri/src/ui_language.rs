@@ -1,10 +1,13 @@
 // [INPUT]: 应用数据目录和显式的 zh/en/vi 界面偏好。
-// [OUTPUT]: 语言读写命令及回环服务共享的当前语言；原子保存后再发布内存状态。
+// [OUTPUT]: 默认越南语的语言读写命令及回环服务共享的当前语言；原子保存后再发布内存状态。
 // [POS]: 界面语言边界，独立于系统语言、浏览器指纹和地区设置。
 // [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 use std::{fs, sync::Mutex};
 use tauri::Manager;
 pub struct UiLanguage(pub Mutex<String>);
+fn preferred_language(stored: Option<String>) -> String {
+    stored.filter(|language| valid(language)).unwrap_or_else(|| "vi".into())
+}
 pub fn valid(language: &str) -> bool {
     matches!(language, "zh" | "en" | "vi")
 }
@@ -14,9 +17,8 @@ impl UiLanguage {
             .path()
             .app_data_dir()
             .ok()
-            .and_then(|dir| fs::read_to_string(dir.join("ui-language")).ok())
-            .filter(|language| valid(language));
-        Self(Mutex::new(stored.unwrap_or_else(|| "zh".into())))
+            .and_then(|dir| fs::read_to_string(dir.join("ui-language")).ok());
+        Self(Mutex::new(preferred_language(stored)))
     }
 }
 #[tauri::command]
@@ -77,6 +79,14 @@ pub fn menu(
 }
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn vietnamese_is_default_without_overwriting_saved_choices() {
+        assert_eq!(super::preferred_language(None), "vi");
+        assert_eq!(super::preferred_language(Some("invalid".into())), "vi");
+        for language in ["zh", "en", "vi"] {
+            assert_eq!(super::preferred_language(Some(language.into())), language);
+        }
+    }
     #[test]
     fn locale_is_independent_and_restricted() {
         assert!(super::valid("zh"));

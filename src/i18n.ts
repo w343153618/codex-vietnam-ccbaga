@@ -1,6 +1,6 @@
 /**
  * [INPUT]: 编译期加载的中文、英文和越南语 YAML 目录，React 外部状态订阅与宿主提供的界面语言。
- * [OUTPUT]: translate、useI18n、setLocale；支持参数化文案和原生层消息，切换立即刷新已有结果。
+ * [OUTPUT]: 默认越南语的 translate、useI18n、setLocale；支持参数化文案和原生层消息，切换立即刷新已有结果。
  * [POS]: 两个前端入口的文案边界；源文案作稳定键，界面语言不改变机器语言、地区或网络配置。
  * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
  */
@@ -12,7 +12,7 @@ export type Locale='zh'|'en'|'vi';
 type Values=Record<string,string|number>;
 const catalogs:Record<Locale,Record<string,string>>={zh,en,vi};
 const listeners=new Set<()=>void>();
-let locale:Locale='zh';
+let locale:Locale='vi';
 const subscribe=(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener);};};
 const escape=(text:string)=>text.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 // ----- 原生层保留原始诊断；仅在呈现边界翻译，不改路径、配置或错误契约 -----

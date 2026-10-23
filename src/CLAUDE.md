@@ -36,3 +36,5 @@ Linux 呈现边界：设备平台由原生快照提供；未知定位不显示�
 [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 
 Vietnam derivative: i18n.ts, language-switch.tsx and browser context support zh/en/vi; dateLocale preserves each display locale; vi.yaml has full key/placeholder parity. Browser checks recognize only the Asia/Saigon alias of Asia/Ho_Chi_Minh.
+
+Vietnam vn.2: initial UI and quick-action fallback are Vietnamese/VN; quick actions prefer the current browser region, but delayed reads never overwrite a user choice.

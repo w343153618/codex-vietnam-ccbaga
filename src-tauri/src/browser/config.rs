@@ -1,5 +1,5 @@
 // [INPUT]: 原生机器快照、独立浏览器配置和实际引擎版本。
-// [OUTPUT]: 含有效国家的机器快照、独立目标地区与 Default 资料参数；仅显式代理时增加回环正向豁免，保留真实设备与 TUN 默认路由。
+// [OUTPUT]: 默认越南地区、含有效国家的机器快照与独立 Default 资料参数；仅显式代理时增加回环正向豁免，保留真实设备与 TUN 默认路由。
 // [POS]: 浏览器配置真相源；路径来自宿主，输入不能变成额外命令参数。
 // [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 #[cfg(target_os = "linux")]
@@ -53,9 +53,9 @@ impl Default for Config {
         Self {
             seed: 495574189,
             proxy: String::new(),
-            follow_machine: true,
-            language: "en-US".into(),
-            timezone: "America/New_York".into(),
+            follow_machine: false,
+            language: "vi-VN".into(),
+            timezone: "Asia/Ho_Chi_Minh".into(),
             native_graphics: true,
         }
     }

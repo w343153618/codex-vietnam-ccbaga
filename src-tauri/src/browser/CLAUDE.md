@@ -14,3 +14,5 @@ workspace_tests.rs: 临时数据库清理前明确释放句柄以兼容 Windows�
 [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 
 Vietnam derivative: config.rs accepts vi and vi-VN; network.rs uses the narrow Vietnam timezone alias equivalence. Tests retain rejection of mismatching countries, language and missing observations.
+
+Vietnam vn.2: missing browser configuration defaults explicitly to vi-VN and Asia/Ho_Chi_Minh with follow_machine=false; existing context inheritance and cleanup boundaries are unchanged.

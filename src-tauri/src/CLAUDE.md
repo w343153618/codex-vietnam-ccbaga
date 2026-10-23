@@ -30,3 +30,5 @@ network_links.rs: 固定四域名并发只读 HTTP 探针；下载元数据仅�
 [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 
 Vietnam derivative: regions.rs adds VN/vi-VN/vi_VN; same_timezone recognizes the IANA Vietnam alias only. ui_language.rs persists zh/en/vi and translates tray labels; platform language options include Vietnamese.
+
+Vietnam vn.2: missing/invalid UI preference defaults to vi while explicit zh/en/vi remains respected.

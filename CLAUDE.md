@@ -56,3 +56,5 @@ Windows x64：平台桥使用当前用户 SID、文件所有权、reparse-point 
 伴生页身份卡：检测区上方的紧凑黑色工牌显示本地绑定身份名称/邮箱/组织与联动状态；回环 context 仅传递有界显示字段，不传令牌、账号 UUID、HMAC 或原始文件。浏览器仍绑定 A 而本地登录变成 B 时保留 A 名称并标为待同步，不冒充网页登录身份；读取未知/主程序断连均不显示已联动。
 
 密码迁移：保存卡片原生导出/导入，五分钟一次性文件票据、>=12字符密码，PBKDF2-HMAC-SHA256 600000 次 + 既有 AES-GCM/tar/Zstd；不导出 key.bin/SQLite/恢复日志。同 OS 完整认证与白名单/成员/容量/链接/Windows 别名验收后，以目标主密钥重封装并重算账号 HMAC，新增记录/摘要/可选指纹绑定同事务，已有账号/指纹冲突拒绝覆盖，不自动切换或读活跃钥匙串。可选浏览器只环境与种子，不含 Cookie/密码/登录/代理，历史正文与旧项目绝对路径不改写。界面复用实际迁移阶段进度，密码不持久化；导入必须确认可信来源，完整性认证不净化 hooks/插件/MCP，后续恢复/启动第三方客户端可能执行配置命令。
+
+Vietnam derivative vn.2 defaults to Vietnamese UI and Vietnam browser/quick-action settings, preserving explicit saved choices and profile cleanup boundaries.

@@ -13,7 +13,7 @@ pub(super) fn machine() -> Machine {
         locale: "en_US".into(),
         locale_country: "US".into(),
         location_enabled: Some(false),
-        timezones: vec!["America/New_York".into()],
+        timezones: vec!["America/New_York".into(), "Asia/Ho_Chi_Minh".into()],
         system_proxy: String::new(),
     }
 }
@@ -578,7 +578,7 @@ fn follow_machine_taiwan_preserves_language_script_and_checks_actual_country() {
     machine.languages = vec!["zh-Hans-TW".into(), "zh-Hant-TW".into()];
     machine.locale = "zh_CN@rg=twzzzz".into();
     machine.locale_country = "TW".into();
-    let config = Config::default();
+    let config = Config { follow_machine: true, ..Config::default() };
     assert_eq!(config.region(&machine).map(|r| r.id), Some("tw"));
     assert_eq!(config.language(&machine), "zh-Hans-TW");
     let mut report = network::Report {
@@ -640,7 +640,7 @@ fn refreshed_context_recomputes_target_from_effective_machine_country() {
         },
         ui_language: "zh".into(),
         exit_services: &network::SERVICES,
-        config: Config::default(),
+        config: Config { follow_machine: true, ..Config::default() },
         region: None,
         machine: machine(),
         engine_version: "148".into(),
@@ -681,4 +681,14 @@ fn vietnam_browser_config_preserves_real_language_and_region_checks() {
     assert_eq!(c.region(&m).map(|r| r.id), Some("vn"));
     c.language = "invalid-language".into();
     assert!(c.validate(&m).is_err());
+}
+
+#[test]
+fn vietnam_defaults_are_explicit_and_do_not_follow_a_different_machine() {
+    let config = Config::default();
+    let computer = machine();
+    assert!(!config.follow_machine);
+    assert_eq!(config.language(&computer), "vi-VN");
+    assert_eq!(config.timezone(&computer), "Asia/Ho_Chi_Minh");
+    assert_eq!(config.region(&computer).map(|region| region.id), Some("vn"));
 }
