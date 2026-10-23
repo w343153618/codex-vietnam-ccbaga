@@ -32,3 +32,5 @@ network_links.rs: 固定四域名并发只读 HTTP 探针；下载元数据仅�
 Vietnam derivative: regions.rs adds VN/vi-VN/vi_VN; same_timezone recognizes the IANA Vietnam alias only. ui_language.rs persists zh/en/vi and translates tray labels; platform language options include Vietnamese.
 
 Vietnam vn.2: missing/invalid UI preference defaults to vi while explicit zh/en/vi remains respected.
+
+Vietnam vn.3 linux.rs: uses_browser_profile matches the managed /usr/libexec/CCBaga-B/chrome.upstream executable as well as ordinary Chromium; rewritten single-field titles accept leading switches only, with one exact user-data-dir and no child type. Process enumeration remains current-user-only and quit rechecks PID/executable before SIGTERM.

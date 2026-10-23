@@ -1,5 +1,5 @@
 // [INPUT]: 当前用户 procfs、zoneinfo、桌面偏好和本地会话工具。
-// [OUTPUT]: Linux 平台 JSON 桥；未知状态保留 null，会话语言变化要求用户手动操作。
+// [OUTPUT]: Linux 平台 JSON 桥；识别受管 diverted 引擎及 Chromium 单字段进程标题，保持同用户与精确资料约束；未知状态保留 null。
 // [POS]: 仅原生识别与用户触发的系统操作；不含网络客户端，不向 UI 输出进程参数或代理秘密。
 // [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 use serde_json::{json, Value};
@@ -200,18 +200,50 @@ pub fn node_cli(process: &Process) -> bool {
     }
     false
 }
-fn profile_processes(profile: &str) -> Result<Vec<Process>, String> {
+fn uses_browser_profile(process: &Process, profile: &str) -> bool {
+    let ordinary_browser = matches!(
+        process.executable.file_name().and_then(|s| s.to_str()),
+        Some("chrome" | "chromium" | "chromium-browser")
+    );
+    // This path is the packaged engine retained by the managed Debian diversion.
+    // Do not accept arbitrary executables merely named chrome.upstream.
+    if !ordinary_browser
+        && process.executable != Path::new("/usr/libexec/CCBaga-B/chrome.upstream")
+    {
+        return false;
+    }
+    let arguments: Vec<&str> = if process.args.len() == 1 {
+        // Chromium can rewrite procfs argv as one space-separated process title.
+        // Accept only its leading switches, never matching text inside a URL.
+        let Some(executable) = process.executable.to_str() else { return false; };
+        let Some(title) = process.args[0].strip_prefix(executable)
+            .and_then(|suffix| suffix.strip_prefix(' ')) else { return false; };
+        let mut switches = Vec::new();
+        for arg in title.split_ascii_whitespace() {
+            if arg == "--" { break; }
+            if arg.starts_with('-') { switches.push(arg); continue; }
+            // A flattened title cannot safely distinguish an unquoted space in
+            // a profile from an argument separator. Reject unexplained fragments.
+            if !["http://", "https://", "file://", "about:"].iter()
+                .any(|prefix| arg.starts_with(prefix)) { return false; }
+            break;
+        }
+        switches
+    } else {
+        process.args.iter().skip(1).map(String::as_str)
+            .take_while(|arg| *arg != "--").collect()
+    };
+    if arguments.iter().any(|arg| *arg == "--type" || arg.starts_with("--type=")) {
+        return false;
+    }
     let expected = format!("--user-data-dir={profile}");
+    let mut profiles = arguments.iter().filter(|arg| arg.starts_with("--user-data-dir="));
+    profiles.next().copied() == Some(expected.as_str()) && profiles.next().is_none()
+}
+fn profile_processes(profile: &str) -> Result<Vec<Process>, String> {
     Ok(processes()?
         .into_iter()
-        .filter(|p| {
-            // Only the browser parent, never unrelated processes mentioning this path.
-            matches!(
-                p.executable.file_name().and_then(|s| s.to_str()),
-                Some("chrome" | "chromium" | "chromium-browser")
-            ) && !p.args.iter().any(|a| a.starts_with("--type="))
-                && p.args.iter().any(|a| a == &expected)
-        })
+        .filter(|p| uses_browser_profile(p, profile))
         .collect())
 }
 pub unsafe fn rf_browser_running(profile: *const c_char) -> *mut c_char {
@@ -404,6 +436,59 @@ pub unsafe fn rf_system_location() -> *mut c_char {
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn browser_process(executable: &str, args: &[&str]) -> Process {
+        Process { pid: 2, executable: executable.into(),
+            args: args.iter().map(|arg| (*arg).into()).collect() }
+    }
+    #[test]
+    fn managed_diverted_browser_matches_nul_argv_and_rewritten_process_title() {
+        let engine = "/usr/libexec/CCBaga-B/chrome.upstream";
+        let profile = "/home/desktop/browser/contexts/test/profile";
+        let flag = format!("--user-data-dir={profile}");
+        let args = [engine, "--load-extension=/opt/extension", &flag,
+            "--fingerprint=123", "http://127.0.0.1:12345/test/browser.html"];
+        assert!(uses_browser_profile(&browser_process(engine, &args), profile));
+        assert!(uses_browser_profile(&browser_process(engine, &[&args.join(" ")]), profile));
+        assert!(uses_browser_profile(&browser_process("/usr/bin/chromium",
+            &["chromium", &flag]), profile));
+    }
+    #[test]
+    fn browser_profile_match_rejects_children_wrong_or_duplicate_profiles() {
+        let engine = "/usr/libexec/CCBaga-B/chrome.upstream";
+        for args in [
+            vec![engine, "--user-data-dir=/profile-other"],
+            vec![engine, "--user-data-dir=/profile", "--type=renderer"],
+            vec![engine, "--type=zygote", "--user-data-dir=/profile"],
+            vec![engine, "--user-data-dir=/profile", "--type", "renderer"],
+            vec![engine, "--user-data-dir=/profile", "--user-data-dir=/other"],
+            vec![engine, "--user-data-dir=/other", "--user-data-dir=/profile"],
+        ] {
+            assert!(!uses_browser_profile(&browser_process(engine, &args), "/profile"));
+            assert!(!uses_browser_profile(&browser_process(engine, &[&args.join(" ")]), "/profile"));
+        }
+    }
+    #[test]
+    fn rewritten_title_does_not_promote_url_text_or_untrusted_engine_names() {
+        let engine = "/usr/libexec/CCBaga-B/chrome.upstream";
+        for title in [
+            format!("{engine} http://example.invalid/ --user-data-dir=/profile"),
+            format!("{engine} -- http://example.invalid/ --user-data-dir=/profile"),
+            format!("{engine} --user-data-dir=/profile-longer --fingerprint=123"),
+            format!("{engine} --user-data-dir=/profile with spaces --fingerprint=123 http://127.0.0.1/test"),
+            "/other/chrome.upstream --user-data-dir=/profile".into(),
+        ] {
+            assert!(!uses_browser_profile(&browser_process(engine, &[&title]), "/profile"));
+        }
+        for executable in ["/tmp/chrome.upstream", "/usr/bin/python3"] {
+            assert!(!uses_browser_profile(&browser_process(executable,
+                &[executable, "--user-data-dir=/profile"]), "/profile"));
+        }
+        assert!(!uses_browser_profile(&browser_process(engine,
+            &[engine, "--", "--user-data-dir=/profile"]), "/profile"));
+        // Normal argv retains exact argument boundaries, including spaces in a profile.
+        assert!(uses_browser_profile(&browser_process(engine,
+            &[engine, "--user-data-dir=/profile with spaces"]), "/profile with spaces"));
+    }
     #[test]
     fn machine_read_is_non_mutating_and_unknown_location_is_null() {
         let state: Value = crate::native::decode(unsafe { rf_browser_machine() }).unwrap();
